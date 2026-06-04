@@ -1,170 +1,80 @@
-# Karpathy-Inspired Claude Code Guidelines
+# andrej-karpathy-skills
 
-> Check out my new project [Multica](https://github.com/multica-ai/multica) — an open-source platform for running and managing coding agents with reusable skills.
->
-> Follow me on X: [https://x.com/jiayuan_jy](https://x.com/jiayuan_jy)
+Codex에서 `$karpathy-guidelines`를 repo-local skill로 쓰기 위한 파일 모음입니다.
 
-A single `CLAUDE.md` file to improve Claude Code behavior, derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls.
+## 파일 구성
 
-English | [简体中文](./README.zh.md)
-
-## The Problems
-
-From Andrej's post:
-
-> "The models make wrong assumptions on your behalf and just run along with them without checking. They don't manage their confusion, don't seek clarifications, don't surface inconsistencies, don't present tradeoffs, don't push back when they should."
-
-> "They really like to overcomplicate code and APIs, bloat abstractions, don't clean up dead code... implement a bloated construction over 1000 lines when 100 would do."
-
-> "They still sometimes change/remove comments and code they don't sufficiently understand as side effects, even if orthogonal to the task."
-
-## The Solution
-
-Four principles in one file that directly address these issues:
-
-| Principle | Addresses |
-|-----------|-----------|
-| **Think Before Coding** | Wrong assumptions, hidden confusion, missing tradeoffs |
-| **Simplicity First** | Overcomplication, bloated abstractions |
-| **Surgical Changes** | Orthogonal edits, touching code you shouldn't |
-| **Goal-Driven Execution** | Leverage through tests-first, verifiable success criteria |
-
-## The Four Principles in Detail
-
-### 1. Think Before Coding
-
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
-
-LLMs often pick an interpretation silently and run with it. This principle forces explicit reasoning:
-
-- **State assumptions explicitly** — If uncertain, ask rather than guess
-- **Present multiple interpretations** — Don't pick silently when ambiguity exists
-- **Push back when warranted** — If a simpler approach exists, say so
-- **Stop when confused** — Name what's unclear and ask for clarification
-
-### 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-Combat the tendency toward overengineering:
-
-- No features beyond what was asked
-- No abstractions for single-use code
-- No "flexibility" or "configurability" that wasn't requested
-- No error handling for impossible scenarios
-- If 200 lines could be 50, rewrite it
-
-**The test:** Would a senior engineer say this is overcomplicated? If yes, simplify.
-
-### 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-
-- Don't "improve" adjacent code, comments, or formatting
-- Don't refactor things that aren't broken
-- Match existing style, even if you'd do it differently
-- If you notice unrelated dead code, mention it — don't delete it
-
-When your changes create orphans:
-
-- Remove imports/variables/functions that YOUR changes made unused
-- Don't remove pre-existing dead code unless asked
-
-**The test:** Every changed line should trace directly to the user's request.
-
-### 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform imperative tasks into verifiable goals:
-
-| Instead of... | Transform to... |
-|--------------|-----------------|
-| "Add validation" | "Write tests for invalid inputs, then make them pass" |
-| "Fix the bug" | "Write a test that reproduces it, then make it pass" |
-| "Refactor X" | "Ensure tests pass before and after" |
-
-For multi-step tasks, state a brief plan:
-
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
+```text
+.agents/skills/karpathy-guidelines/SKILL.md
+.agents/skills/karpathy-guidelines/agents/openai.yaml
+.codex/config.toml
+.codex/hooks.json
+.codex/hooks/ensure_agents.py
+.codex/hooks/karpathy_context.py
+.codex/hooks/normalize_text_line_endings.py
+.codex/templates/AGENTS.md
+README_for_codex.md
 ```
 
-Strong success criteria let the LLM loop independently. Weak criteria ("make it work") require constant clarification.
+- `.agents/skills/karpathy-guidelines/SKILL.md`: 공통 코딩 행동 지침입니다.
+- `.agents/skills/karpathy-guidelines/agents/openai.yaml`: Codex UI에 표시할 skill 메타데이터입니다.
+- `.codex/config.toml`: Codex hooks 기능을 켭니다.
+- `.codex/hooks.json`: 수명 주기 hook 실행 조건과 명령을 정의합니다.
+- `.codex/templates/AGENTS.md`: 대상 저장소에 복사할 자체 완결형 `AGENTS.md` 템플릿입니다.
+- `README_for_codex.md`: Codex에게 사용자 전역 설치를 맡길 때 읽히는 절차서입니다.
 
-## Install
+## Hook 동작
 
-**Option A: Claude Code Plugin (recommended)**
+- `ensure_agents.py`: `SessionStart startup`에서 `AGENTS.md`가 없으면 템플릿을 복사합니다.
+- `karpathy_context.py`: `SessionStart`와 `PostCompact`에서 skill, AGENTS, Windows 실행 지침만 짧게 주입합니다.
+- `normalize_text_line_endings.py`: 새 텍스트 파일은 CRLF로 맞추고, 기존 추적 텍스트 파일은 기존 개행 스타일을 따릅니다.
+- `PostToolUse` matcher는 `.*`로 두고, 각 hook script가 payload를 보고 필요한 경우에만 동작합니다.
 
-From within Claude Code, first add the marketplace:
-```
-/plugin marketplace add forrestchang/andrej-karpathy-skills
-```
+## 다른 저장소에 적용
 
-Then install the plugin:
-```
-/plugin install andrej-karpathy-skills@karpathy-skills
-```
+이 저장소 루트에서 실행하는 예시입니다.
 
-This installs the guidelines as a Claude Code plugin, making the skill available across all your projects.
+```powershell
+$Target = "..\my-project"
 
-**Option B: CLAUDE.md (per-project)**
+New-Item -Path "$Target\.agents\skills" -ItemType Directory -Force | Out-Null
+New-Item -Path "$Target\.codex\hooks" -ItemType Directory -Force | Out-Null
+New-Item -Path "$Target\.codex\templates" -ItemType Directory -Force | Out-Null
 
-New project:
-```bash
-curl -o CLAUDE.md https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/main/CLAUDE.md
-```
-
-Existing project (append):
-```bash
-echo "" >> CLAUDE.md
-curl https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/main/CLAUDE.md >> CLAUDE.md
-```
-
-## Using with Cursor
-
-This repository includes a committed Cursor project rule ([`.cursor/rules/karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc)) so the same guidelines apply when you open the project in Cursor. See **[CURSOR.md](CURSOR.md)** for setup, using the rule in other projects, and how this relates to Claude Code.
-
-## Key Insight
-
-From Andrej:
-
-> "LLMs are exceptionally good at looping until they meet specific goals... Don't tell it what to do, give it success criteria and watch it go."
-
-The "Goal-Driven Execution" principle captures this: transform imperative instructions into declarative goals with verification loops.
-
-## How to Know It's Working
-
-These guidelines are working if you see:
-
-- **Fewer unnecessary changes in diffs** — Only requested changes appear
-- **Fewer rewrites due to overcomplication** — Code is simple the first time
-- **Clarifying questions come before implementation** — Not after mistakes
-- **Clean, minimal PRs** — No drive-by refactoring or "improvements"
-
-## Customization
-
-These guidelines are designed to be merged with project-specific instructions. Add them to your existing `CLAUDE.md` or create a new one.
-
-For project-specific rules, add sections like:
-
-```markdown
-## Project-Specific Guidelines
-
-- Use TypeScript strict mode
-- All API endpoints must have tests
-- Follow the existing error handling patterns in `src/utils/errors.ts`
+Copy-Item -Recurse -Force ".\.agents\skills\karpathy-guidelines" "$Target\.agents\skills\"
+Copy-Item -Force ".\.codex\config.toml" "$Target\.codex\config.toml"
+Copy-Item -Force ".\.codex\hooks.json" "$Target\.codex\hooks.json"
+Copy-Item -Force ".\.codex\hooks\*.py" "$Target\.codex\hooks\"
+Copy-Item -Force ".\.codex\templates\AGENTS.md" "$Target\.codex\templates\AGENTS.md"
 ```
 
-## Tradeoff Note
+대상 저장소에 기존 `.codex/config.toml`, `.codex/hooks.json`, `AGENTS.md`가 있으면 덮어쓰지 말고 필요한 항목만 병합하세요.
 
-These guidelines bias toward **caution over speed**. For trivial tasks (simple typo fixes, obvious one-liners), use judgment — not every change needs the full rigor.
+## 사용자 전역 설치
 
-The goal is reducing costly mistakes on non-trivial work, not slowing down simple tasks.
+다른 컴퓨터에서 이 저장소를 연 뒤 Codex에게 아래처럼 요청하면 됩니다.
+
+```text
+README_for_codex.md를 읽고 이 skill과 hook을 사용자 전역으로 설치해 주세요.
+```
+
+## 확인
+
+```powershell
+$hookFiles = (Get-ChildItem -Path .codex\hooks -Filter *.py).FullName
+@'
+import sys
+from pathlib import Path
+
+for name in sys.argv[1:]:
+    path = Path(name)
+    compile(path.read_text(encoding="utf-8"), str(path), "exec")
+'@ | python - $hookFiles
+'{"hook_event_name":"SessionStart","source":"startup","cwd":"."}' | python .codex\hooks\karpathy_context.py
+git diff --check
+```
+
+Codex에서 hook을 쓰려면 해당 저장소를 신뢰하고, 새 hook 또는 변경된 hook은 `/hooks`에서 승인해야 합니다.
 
 ## License
 

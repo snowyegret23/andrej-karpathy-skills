@@ -1,0 +1,52 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-cdup).codex/hooks/ensure_agents.py\"",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-cdup).codex/hooks/karpathy_context.py\"",
+            "timeout": 30,
+            "statusMessage": "Loading Karpathy guidelines"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-cdup).codex/hooks/karpathy_context.py\"",
+            "timeout": 30,
+            "statusMessage": "Restoring Karpathy guidelines after compaction"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$(git rev-parse --show-cdup).codex/hooks/normalize_text_line_endings.py\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

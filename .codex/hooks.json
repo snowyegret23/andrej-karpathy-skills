@@ -25,20 +25,6 @@
         ]
       }
     ],
-    "PostCompact": [
-      {
-        "matcher": "manual|auto",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python \"$(git rev-parse --show-cdup).codex/hooks/karpathy_context.py\"",
-            "commandWindows": "& \"$(git rev-parse --show-cdup).codex/hooks/run_python_hook.ps1\" \"$(git rev-parse --show-cdup).codex/hooks/karpathy_context.py\"",
-            "timeout": 30,
-            "statusMessage": "Restoring Karpathy guidelines after compaction"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": ".*",

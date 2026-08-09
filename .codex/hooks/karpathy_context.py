@@ -2,7 +2,7 @@ import json
 import sys
 
 
-SUPPORTED_EVENTS = {"SessionStart", "PostCompact"}
+SUPPORTED_EVENTS = {"SessionStart"}
 
 
 def load_payload() -> dict:

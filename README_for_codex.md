@@ -53,7 +53,6 @@ run_python_hook.ps1
 
 - `SessionStart` `startup`: `ensure_agents.py`
 - `SessionStart` `startup|resume|clear|compact`: `karpathy_context.py`
-- `PostCompact` `manual|auto`: `karpathy_context.py`
 - `PostToolUse` `.*`: `normalize_text_line_endings.py`
 
 각 hook의 `command`는 비-Windows용 Python 명령과 Codex home에 복사한 script의 해석된 경로를 사용한다. Windows용 `commandWindows`는 PowerShell 호출 연산자(`&`)로 전역 `run_python_hook.ps1`과 대상 Python script의 해석된 경로를 호출한다. 실행기는 Store 별칭을 제외하고 실제 Python을 동적으로 찾으므로 사용자명, 설치 경로, Python 버전을 하드코딩하지 않는다. 필요하면 `KARPATHY_PYTHON` 환경 변수로 `python.exe`를 지정한다. repo-local `.codex\hooks.json`은 명령 경로가 저장소 기준이므로 전역 `hooks.json`에 그대로 복사하지 않는다.
@@ -67,7 +66,7 @@ $hookFiles = (Get-ChildItem -Path .codex\hooks -Filter *.py).FullName
 foreach ($hookFile in $hookFiles) {
     & .\.codex\hooks\run_python_hook.ps1 $hookFile -CompileOnly
 }
-'{"hook_event_name":"SessionStart","source":"startup","cwd":"."}' | & .\.codex\hooks\run_python_hook.ps1 .\.codex\hooks\karpathy_context.py
+'{"hook_event_name":"SessionStart","source":"compact","cwd":"."}' | & .\.codex\hooks\run_python_hook.ps1 .\.codex\hooks\karpathy_context.py
 git diff --check
 ```
 

@@ -27,7 +27,7 @@ README_for_codex.md
 ## Hook 동작
 
 - `ensure_agents.py`: `SessionStart startup`에서 `AGENTS.md`가 없으면 템플릿을 복사합니다.
-- `karpathy_context.py`: `SessionStart`와 `PostCompact`에서 skill, AGENTS, Windows 실행 지침만 짧게 주입합니다.
+- `karpathy_context.py`: `SessionStart`에서 skill, AGENTS, Windows 실행 지침만 짧게 주입하며 `source=compact`일 때 압축 후에도 다시 주입합니다.
 - `normalize_text_line_endings.py`: 새 텍스트 파일은 CRLF로 맞추고, 기존 추적 텍스트 파일은 기존 개행 스타일을 따릅니다.
 - `run_python_hook.ps1`: Store 별칭을 제외한 실제 Python을 찾아 UTF-8 모드로 hook을 실행합니다.
 - `PostToolUse` matcher는 `.*`로 두고, 각 hook script가 payload를 보고 필요한 경우에만 동작합니다.
@@ -69,7 +69,7 @@ $hookFiles = (Get-ChildItem -Path .codex\hooks -Filter *.py).FullName
 foreach ($hookFile in $hookFiles) {
     & .\.codex\hooks\run_python_hook.ps1 $hookFile -CompileOnly
 }
-'{"hook_event_name":"SessionStart","source":"startup","cwd":"."}' | & .\.codex\hooks\run_python_hook.ps1 .\.codex\hooks\karpathy_context.py
+'{"hook_event_name":"SessionStart","source":"compact","cwd":"."}' | & .\.codex\hooks\run_python_hook.ps1 .\.codex\hooks\karpathy_context.py
 git diff --check
 ```
 

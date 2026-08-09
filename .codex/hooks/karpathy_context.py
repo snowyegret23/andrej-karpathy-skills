@@ -20,9 +20,12 @@ def main() -> int:
         return 0
 
     context = (
-        "Use $karpathy-guidelines for code/review/debug/refactor/plans. "
-        "Follow AGENTS.md. Windows: PowerShell, no Bash heredocs, UTF-8 Python "
-        "text IO, relative paths."
+        "Use $karpathy-guidelines for code/review/debug/refactor. Follow "
+        "AGENTS.md when present. Execute clear requests directly; do not "
+        "create plan/spec/test files, use worktrees, or spawn subagents unless "
+        "requested. Use English commit messages. Windows: PowerShell, no Bash "
+        "heredocs, a resolved Python interpreter instead of the Store alias, UTF-8 "
+        "Python text IO, relative paths."
     )
 
     output = {

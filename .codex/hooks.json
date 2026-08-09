@@ -7,6 +7,7 @@
           {
             "type": "command",
             "command": "python \"$(git rev-parse --show-cdup).codex/hooks/ensure_agents.py\"",
+            "commandWindows": "& \"$(git rev-parse --show-cdup).codex/hooks/run_python_hook.ps1\" \"$(git rev-parse --show-cdup).codex/hooks/ensure_agents.py\"",
             "timeout": 30
           }
         ]
@@ -17,6 +18,7 @@
           {
             "type": "command",
             "command": "python \"$(git rev-parse --show-cdup).codex/hooks/karpathy_context.py\"",
+            "commandWindows": "& \"$(git rev-parse --show-cdup).codex/hooks/run_python_hook.ps1\" \"$(git rev-parse --show-cdup).codex/hooks/karpathy_context.py\"",
             "timeout": 30,
             "statusMessage": "Loading Karpathy guidelines"
           }
@@ -30,6 +32,7 @@
           {
             "type": "command",
             "command": "python \"$(git rev-parse --show-cdup).codex/hooks/karpathy_context.py\"",
+            "commandWindows": "& \"$(git rev-parse --show-cdup).codex/hooks/run_python_hook.ps1\" \"$(git rev-parse --show-cdup).codex/hooks/karpathy_context.py\"",
             "timeout": 30,
             "statusMessage": "Restoring Karpathy guidelines after compaction"
           }
@@ -43,6 +46,7 @@
           {
             "type": "command",
             "command": "python \"$(git rev-parse --show-cdup).codex/hooks/normalize_text_line_endings.py\"",
+            "commandWindows": "& \"$(git rev-parse --show-cdup).codex/hooks/run_python_hook.ps1\" \"$(git rev-parse --show-cdup).codex/hooks/normalize_text_line_endings.py\"",
             "timeout": 60
           }
         ]

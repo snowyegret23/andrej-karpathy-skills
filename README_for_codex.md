@@ -34,6 +34,7 @@
 .codex/hooks/ensure_agents.py
 .codex/hooks/karpathy_context.py
 .codex/hooks/normalize_text_line_endings.py
+.codex/hooks/run_python_hook.ps1
 ```
 
 3. Codex home의 `templates` 디렉터리에 `.codex\templates\AGENTS.md`를 복사한다.
@@ -45,6 +46,7 @@
 ensure_agents.py
 karpathy_context.py
 normalize_text_line_endings.py
+run_python_hook.ps1
 ```
 
 7. Codex home의 `hooks.json`에 아래 전역 hook을 병합한다.
@@ -54,7 +56,7 @@ normalize_text_line_endings.py
 - `PostCompact` `manual|auto`: `karpathy_context.py`
 - `PostToolUse` `.*`: `normalize_text_line_endings.py`
 
-각 command는 Codex home에 복사한 script의 해석된 경로를 사용하고, 공백이 있는 경로도 실행되도록 따옴표로 감싼다. repo-local `.codex\hooks.json`은 명령 경로가 저장소 기준이므로 전역 `hooks.json`에 그대로 복사하지 않는다.
+각 hook의 `command`는 비-Windows용 Python 명령과 Codex home에 복사한 script의 해석된 경로를 사용한다. Windows용 `commandWindows`는 PowerShell 호출 연산자(`&`)로 전역 `run_python_hook.ps1`과 대상 Python script의 해석된 경로를 호출한다. 실행기는 Store 별칭을 제외하고 실제 Python을 동적으로 찾으므로 사용자명, 설치 경로, Python 버전을 하드코딩하지 않는다. 필요하면 `KARPATHY_PYTHON` 환경 변수로 `python.exe`를 지정한다. repo-local `.codex\hooks.json`은 명령 경로가 저장소 기준이므로 전역 `hooks.json`에 그대로 복사하지 않는다.
 
 ## 설치 후 검증
 
@@ -62,15 +64,10 @@ PowerShell에서 아래 내용을 확인한다.
 
 ```powershell
 $hookFiles = (Get-ChildItem -Path .codex\hooks -Filter *.py).FullName
-@'
-import sys
-from pathlib import Path
-
-for name in sys.argv[1:]:
-    path = Path(name)
-    compile(path.read_text(encoding="utf-8"), str(path), "exec")
-'@ | python - $hookFiles
-'{"hook_event_name":"SessionStart","source":"startup","cwd":"."}' | python .codex\hooks\karpathy_context.py
+foreach ($hookFile in $hookFiles) {
+    & .\.codex\hooks\run_python_hook.ps1 $hookFile -CompileOnly
+}
+'{"hook_event_name":"SessionStart","source":"startup","cwd":"."}' | & .\.codex\hooks\run_python_hook.ps1 .\.codex\hooks\karpathy_context.py
 git diff --check
 ```
 

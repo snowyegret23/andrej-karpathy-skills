@@ -1,6 +1,6 @@
 ---
 name: karpathy-guidelines
-description: Coding behavior guidelines for Codex. Use when writing, reviewing, debugging, refactoring, or planning code changes; apply think-before-coding, simplicity-first, surgical changes, and goal-driven verification to avoid hidden assumptions, overengineering, unrelated edits, and unverified work.
+description: Coding behavior guidelines for Codex. Use when writing, reviewing, debugging, or refactoring code; apply think-before-coding, simplicity-first, surgical changes, and goal-driven verification to avoid hidden assumptions, overengineering, unrelated edits, and unverified work.
 ---
 
 # Karpathy Guidelines
@@ -20,6 +20,8 @@ LLM 코딩 작업에서 자주 생기는 실패 패턴을 줄이기 위한 Codex
 - 한 번만 쓰는 코드를 위해 추상화하지 않는다.
 - 요구되지 않은 설정 가능성, 범용화, 방어 코드를 늘리지 않는다.
 - 숙련된 엔지니어가 "과하다"고 볼 코드라면 줄인다.
+- 명확한 요청은 별도 계획 문서나 승인 단계 없이 바로 수행한다.
+- 사용자가 명시하지 않으면 계획/명세 문서, 새 테스트 파일, worktree, subagent를 생성하지 않는다.
 - 배포용 `README.md`에는 내부 작업 범위, 제외한 원본/산출물, Git에 올리지 않는 파일 목록 같은 AI용 설명을 길게 쓰지 않는다. 그런 맥락은 필요하면 AI가 읽는 내부 `.md`에만 둔다.
 - 새 코드에는 불필요한 주석, 모듈 docstring, 함수 docstring을 넣지 않는다.
 - `#!/usr/bin/env python3` 같은 shebang은 실행 파일로 직접 호출해야 할 때만 넣는다.
@@ -37,26 +39,20 @@ LLM 코딩 작업에서 자주 생기는 실패 패턴을 줄이기 위한 Codex
 ## 4. 검증까지 실행
 
 - 시작 전에 성공 기준과 검증 방법을 정한다.
-- 버그 수정은 재현 검증을 먼저 만든 뒤 고친다.
-- 리팩터링은 변경 전후 테스트가 통과함을 확인한다.
+- 버그 수정은 가장 작은 진단 명령으로 증상을 재현하고 원인을 확인한 뒤 고친다.
+- 기존 검증 수단이 있으면 변경 전후 결과를 비교하되, 검증만을 위해 새 테스트 파일을 자동 생성하지 않는다.
 - 완료라고 말하기 전에 실제 명령을 실행하고 결과를 확인한다.
 - 작은 의미 단위 작업이 완료되고 검증되면 자율적으로 커밋한다.
 - 커밋 전 `git status --short`, 변경 범위, 검증 결과를 확인한다.
 - 관련 없는 사용자 변경은 커밋에 섞지 않는다.
 - 검증 실패, git 작업 진행 중, 변경 목적 불명확 상태에서는 커밋하지 않는다.
-- 커밋 메시지는 한국어로 의미 있게 작성한다.
-
-여러 단계 작업은 짧게 쪼갠다.
-
-```text
-1. [단계] -> 검증: [확인 방법]
-2. [단계] -> 검증: [확인 방법]
-3. [단계] -> 검증: [확인 방법]
-```
+- 커밋 메시지는 의미 있는 영어로 작성한다.
 
 ## 5. Windows와 UTF-8
 
 - 기본 셸은 Windows PowerShell로 본다.
+- Python 명령은 Microsoft Store 실행 별칭을 제외하고 실제 인터프리터 경로를 먼저 해석한다. 사용자명이나 Python 버전이 들어간 절대경로를 지침에 하드코딩하지 않는다.
+- 아래 PowerShell 예시의 `$Python`은 이 기준으로 미리 해석한 실행 파일 경로다.
 - 문서, 예시, 설정, 스크립트에 파일시스템 경로를 적을 때는 상대경로를 사용한다.
 - Bash heredoc `python <<'PY'`를 쓰지 않는다.
 - 인라인 Python은 here-string을 사용한다.
@@ -64,7 +60,7 @@ LLM 코딩 작업에서 자주 생기는 실패 패턴을 줄이기 위한 Codex
 ```powershell
 @'
 print("hello")
-'@ | python -
+'@ | & $Python -X utf8 -
 ```
 
 - PowerShell `foreach (...) { ... }` 바로 뒤에 파이프를 붙이지 않는다. 결과를 변수에 담거나 식을 감싼다.

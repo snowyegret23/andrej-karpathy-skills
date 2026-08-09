@@ -1,4 +1,4 @@
 interface:
   display_name: "Karpathy Guidelines"
   short_description: "Korean coding guidelines for reducing agent mistakes"
-  default_prompt: "Use $karpathy-guidelines when planning or editing code in this task."
+  default_prompt: "Use $karpathy-guidelines when writing, reviewing, debugging, or refactoring code in this task."

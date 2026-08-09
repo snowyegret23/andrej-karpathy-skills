@@ -69,7 +69,9 @@ $hookFiles = (Get-ChildItem -Path .codex\hooks -Filter *.py).FullName
 foreach ($hookFile in $hookFiles) {
     & .\.codex\hooks\run_python_hook.ps1 $hookFile -CompileOnly
 }
-'{"hook_event_name":"SessionStart","source":"compact","cwd":"."}' | & .\.codex\hooks\run_python_hook.ps1 .\.codex\hooks\karpathy_context.py
+$PowerShell = (Get-Command pwsh -ErrorAction Stop).Source
+$HookCommand = '& ".\.codex\hooks\run_python_hook.ps1" ".\.codex\hooks\karpathy_context.py"'
+'{"hook_event_name":"SessionStart","source":"compact","cwd":"."}' | & $PowerShell -NoProfile -NonInteractive -Command $HookCommand
 git diff --check
 ```
 

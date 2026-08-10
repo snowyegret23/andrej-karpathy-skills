@@ -9,18 +9,6 @@ from pathlib import Path
 TEXT_SUFFIXES = {".py", ".ps1", ".bat", ".md", ".json", ".yaml", ".yml", ".toml", ".txt"}
 TEXT_NAMES = {".gitattributes", ".gitignore"}
 DEFAULT_EOL = b"\r\n"
-SKIP_DIRS = {
-    ".git",
-    ".venv",
-    "venv",
-    "env",
-    "node_modules",
-    "dist",
-    "build",
-    "out",
-    "target",
-    "__pycache__",
-}
 PATHISH_KEYS = {
     "file",
     "file_path",
@@ -68,24 +56,6 @@ def is_text_target(path: Path) -> bool:
     return path.suffix.lower() in TEXT_SUFFIXES or path.name.lower() in TEXT_NAMES
 
 
-def iter_text_files(root: Path):
-    stack = [root]
-    while stack:
-        current = stack.pop()
-        try:
-            children = list(current.iterdir())
-        except OSError:
-            continue
-        for path in children:
-            if path.is_symlink():
-                continue
-            if path.is_dir():
-                if path.name not in SKIP_DIRS:
-                    stack.append(path)
-            elif path.suffix.lower() in TEXT_SUFFIXES or path.name.lower() in TEXT_NAMES:
-                yield path
-
-
 def iter_payload_items(value, key: str = ""):
     if isinstance(value, dict):
         for child_key, child_value in value.items():
@@ -124,7 +94,7 @@ def looks_pathish(text: str) -> bool:
 
 def payload_path_strings(payload: dict) -> set[str]:
     paths: set[str] = set()
-    for key, value in iter_payload_items(payload):
+    for key, value in iter_payload_items(payload.get("tool_input", {})):
         if not isinstance(value, str):
             continue
         lower_key = key.lower()
@@ -160,19 +130,7 @@ def resolve_payload_paths(payload: dict, root: Path) -> list[Path]:
                 result.append(resolved)
                 seen.add(resolved)
                 break
-            if resolved.is_dir() and resolved != root:
-                result.append(resolved)
-                seen.add(resolved)
-                break
     return result
-
-
-def iter_target_text_files(target: Path):
-    if target.is_file():
-        if is_text_target(target):
-            yield target
-    elif target.is_dir():
-        yield from iter_text_files(target)
 
 
 def git_head_bytes(root: Path, path: Path) -> bytes | None:
@@ -235,9 +193,8 @@ def normalize_file(root: Path, path: Path) -> None:
 def main() -> int:
     payload = load_payload()
     root = repo_root(payload.get("cwd"))
-    for target in resolve_payload_paths(payload, root):
-        for path in iter_target_text_files(target):
-            normalize_file(root, path)
+    for path in resolve_payload_paths(payload, root):
+        normalize_file(root, path)
     return 0
 
 

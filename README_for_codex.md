@@ -77,6 +77,7 @@ git diff --check
 임시 Git 저장소를 만들고 전역 `ensure_agents.py`를 실행해 `AGENTS.md`가 생성되는지 확인한다. 이 저장소 자체에서는 루트 `AGENTS.md`가 생성되지 않아야 한다.
 
 CSV 파일은 줄끝 정규화 hook의 대상이 아니어야 한다. quoted field 안의 LF가 보존되는지 간단한 샘플로 확인한다.
+디렉터리 경로만 전달한 `PostToolUse` payload는 하위 파일을 정규화하지 않고, 개별 텍스트 파일 경로를 전달한 payload만 해당 파일을 정규화하는지 확인한다.
 
 ## 완료 보고
 
